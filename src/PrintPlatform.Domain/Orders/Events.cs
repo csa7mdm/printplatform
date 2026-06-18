@@ -37,3 +37,18 @@ public sealed record OrderDeliveredEvent(
     Guid OrderId,
     Guid CustomerUserId,
     DateTimeOffset OccurredAt) : IDomainEvent;
+
+/// <summary>Raised when a customer leaves a review for an order.</summary>
+public sealed record ReviewLeftEvent(
+    Guid OrderId,
+    Guid CustomerUserId,
+    int Rating,
+    string? Comment,
+    DateTimeOffset OccurredAt) : IDomainEvent;
+
+/// <summary>Raised when a printer owner receives a review for a completed job.</summary>
+public sealed record ReviewReceivedEvent(
+    Guid JobAssignmentId,
+    Guid PrinterOwnerUserId,
+    int Rating,
+    DateTimeOffset OccurredAt) : IDomainEvent;

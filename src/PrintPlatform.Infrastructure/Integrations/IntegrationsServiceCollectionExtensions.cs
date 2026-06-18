@@ -30,18 +30,8 @@ public static class IntegrationsServiceCollectionExtensions
                 options.Retry.UseJitter = true;
                 options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
 
-                // Adding a specific rule for HTTP 429 Too Many Requests
-                 options.Retry.OnRetry = static args =>
-                 {
-                     if (args.Outcome.Result?.StatusCode is HttpStatusCode.TooManyRequests && 
-                        args.Outcome.Result.Headers.TryGetValues("Retry-After", out var values) && 
-                        int.TryParse(values.FirstOrDefault(), out var retryAfterSeconds))
-                     {
-                         // Use the server-suggested retry-after value
-                         args.RetryDelay = TimeSpan.FromSeconds(retryAfterSeconds);
-                     }
-                     return default;
-                 };
+                options.Retry.ShouldHandle = args =>
+                    ValueTask.FromResult(args.Outcome.Result?.StatusCode is HttpStatusCode.TooManyRequests);
             });
 
         return services;

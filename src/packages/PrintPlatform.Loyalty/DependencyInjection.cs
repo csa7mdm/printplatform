@@ -1,5 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PrintPlatform.Loyalty.Abstractions;
+using PrintPlatform.Loyalty.Data;
+using PrintPlatform.Loyalty.Services;
 
 namespace PrintPlatform.Loyalty;
 
@@ -17,9 +21,19 @@ public static class DependencyInjection
         services.Configure<LoyaltyOptions>(
             configuration.GetSection(LoyaltyOptions.SectionName));
 
-        // TODO: services.AddDbContext<LoyaltyDbContext>(...)
-        // TODO: services.AddMediatR(Assembly.GetExecutingAssembly())
-        // TODO: Register tier evaluator, rewards catalog, referral tracker, etc.
+        var connectionString = configuration.GetConnectionString("Loyalty")
+            ?? configuration.GetConnectionString("DefaultConnection");
+
+        if (connectionString != null)
+        {
+            services.AddDbContext<LoyaltyDbContext>(opts =>
+                opts.UseNpgsql(connectionString));
+        }
+
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+
+        services.AddScoped<ILoyaltyService, LoyaltyService>();
+        services.AddSingleton<ITierStrategy, TierStrategy>();
 
         return services;
     }

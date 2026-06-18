@@ -10,6 +10,7 @@ using PrintPlatform.Application;
 using PrintPlatform.Gamification;
 using PrintPlatform.Infrastructure;
 using PrintPlatform.Infrastructure.BackgroundJobs;
+using PrintPlatform.Infrastructure.Data;
 using PrintPlatform.Loyalty;
 using Scalar.AspNetCore;
 using Serilog;
@@ -33,8 +34,7 @@ try
         cfg.ReadFrom.Configuration(ctx.Configuration)
            .ReadFrom.Services(services)
            .Enrich.FromLogContext()
-           .Enrich.WithProperty("Application", "PrintPlatform")
-           .Filter.ByExcluding("RequestPath like '/health/%'"));
+           .Enrich.WithProperty("Application", "PrintPlatform"));
 
     // -----------------------------------------------------------------------
     // Application layers
@@ -144,17 +144,6 @@ try
             },
             name: "storage",
             failureStatus: HealthStatus.Degraded,
-            tags: ["ready"])
-        .AddUrlGroup(uriBuilder =>
-            {
-                var whatsapp = builder.Configuration.GetSection("WhatsApp");
-                uriBuilder.AddUri(new Uri($"{whatsapp["ApiUrl"]}{whatsapp["PhoneNumberId"]}"), http =>
-                {
-                    http.Headers.Add("Authorization", $"Bearer {whatsapp["AccessToken"]}");
-                });
-            },
-            name: "whatsapp",
-            failureStatus: HealthStatus.Degraded,
             tags: ["ready"]);
 
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -210,6 +199,13 @@ try
     
     // Register recurring jobs
     HangfireJobRegistrar.RegisterJobs();
+
+    // -- Seed database ------------------------------------------------------
+    using (var scope = app.Services.CreateScope())
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        await seeder.SeedAsync();
+    }
 
     await app.RunAsync();
 }

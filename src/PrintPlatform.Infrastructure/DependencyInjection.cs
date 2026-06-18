@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ using PrintPlatform.Infrastructure.Data;
 using PrintPlatform.Infrastructure.Dispatch;
 using PrintPlatform.Infrastructure.Identity;
 using PrintPlatform.Infrastructure.Integrations;
+using PrintPlatform.Infrastructure.Marketplace;
 using PrintPlatform.Infrastructure.Notifications;
 using PrintPlatform.Infrastructure.Shipping;
 
@@ -44,8 +46,7 @@ public static class DependencyInjection
                 opts.SignIn.RequireConfirmedPhoneNumber = false;
             })
             .AddRoles<ApplicationRole>()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+            .AddEntityFrameworkStores<AppDbContext>();
 
         // -- Identity module options & services -------------------------------
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
@@ -70,6 +71,8 @@ public static class DependencyInjection
 
         // -- Integrations -----------------------------------------------------
         services.AddIntegrationsInfrastructure(configuration);
+
+        services.AddScoped<DatabaseSeeder>();
 
         return services;
     }

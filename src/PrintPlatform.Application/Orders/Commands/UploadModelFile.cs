@@ -64,7 +64,7 @@ public sealed class UploadModelFileHandler
         var extension = Path.GetExtension(request.OriginalFileName).TrimStart('.').ToLowerInvariant();
         var objectKey = $"models/{request.CustomerUserId}/{Guid.NewGuid():N}.{extension}";
 
-        await _storage.UploadAsync(request.Content, objectKey, request.ContentType, cancellationToken);
+        await _storage.UploadAsync(request.Content, objectKey, request.ContentType, cancellationToken: cancellationToken);
 
         var model = ModelFile.Create(
             request.CustomerUserId,

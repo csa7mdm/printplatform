@@ -1,4 +1,4 @@
-namespace PrintPlatform.Domain.Abstractions;
+namespace PrintPlatform.Application.Abstractions;
 
 /// <summary>
 /// Defines the contract for a transactional file storage service,

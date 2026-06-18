@@ -43,6 +43,11 @@ public abstract class ApiControllerBase : ControllerBase
             ? Ok(result.Value)
             : Problem(result.Error);
 
+    protected IActionResult ToActionResult(Result result) =>
+        result.IsSuccess
+            ? Ok()
+            : Problem(result.Error);
+
     protected IActionResult Problem(Error error)
     {
         var status = error.Type switch

@@ -26,8 +26,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
 
         var (statusCode, title, detail) = exception switch
         {
-            // Custom domain exceptions
-            DomainException de => (StatusCodes.Status400BadRequest, "Bad Request", de.Message),
+            // Custom application exceptions
             NotFoundException nfe => (StatusCodes.Status404NotFound, "Not Found", nfe.Message),
             ConflictException ce => (StatusCodes.Status409Conflict, "Conflict", ce.Message),
 

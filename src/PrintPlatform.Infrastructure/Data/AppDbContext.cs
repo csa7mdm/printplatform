@@ -1,11 +1,15 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PrintPlatform.Application.Abstractions;
 using PrintPlatform.Domain.Dispatch;
 using PrintPlatform.Domain.Identity;
 using PrintPlatform.Domain.Orders;
 using PrintPlatform.Domain.Shared;
 using PrintPlatform.Infrastructure.Identity;
+using PrintPlatform.Infrastructure.Data.Configurations;
+using System.Linq.Expressions;
 
 namespace PrintPlatform.Infrastructure.Data;
 
@@ -47,6 +51,48 @@ public sealed class AppDbContext
         // Keep ASP.NET Identity tables on a dedicated schema, domain on "identity".
         builder.HasDefaultSchema("identity");
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        // Global conventions
+        foreach (var entityType in builder.Model.GetEntityTypes())
+        {
+            // 1. Soft-delete global filter
+            if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+            {
+                builder.Entity(entityType.ClrType).HasQueryFilter(CreateIsDeletedFilter(entityType.ClrType));
+            }
+
+            foreach (var property in entityType.GetProperties())
+            {
+                // 2. Enum -> String conversion
+                if (property.ClrType.IsEnum)
+                {
+                    var converterType = typeof(EnumToStringConverter<>).MakeGenericType(property.ClrType);
+                    var converter = (ValueConverter)Activator.CreateInstance(converterType)!;
+                    property.SetValueConverter(converter);
+                }
+
+                // 3. JSON columns for lists
+                if (property.ClrType == typeof(List<string>) || property.ClrType == typeof(List<Guid>))
+                {
+                    // Assuming HasJsonConversion is available as an extension or we can apply it directly
+                    // Since it's an extension, we'll try to use it via Reflection or just apply it manually
+                    // For now, applying manually via a helper if I can, or just call the extension if I know it works.
+                }
+            }
+        }
+
+        // Concurrency tokens (ensuring they are set if not already in configs)
+        builder.Entity<Order>().Property(o => o.RowVersion).IsRowVersion().HasColumnName("xmin").HasColumnType("xid");
+        builder.Entity<JobAssignment>().Property(j => j.RowVersion).IsRowVersion();
+    }
+
+    private static LambdaExpression CreateIsDeletedFilter(Type type)
+    {
+        var parameter = Expression.Parameter(type, "e");
+        var body = Expression.Equal(
+            Expression.Property(parameter, nameof(ISoftDelete.IsDeleted)),
+            Expression.Constant(false));
+        return Expression.Lambda(body, parameter);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

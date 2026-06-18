@@ -30,12 +30,16 @@ public interface ILoyaltyService
     /// <param name="orderAmountEgp">Total order value in Egyptian Pounds.</param>
     /// <param name="orderReference">Host-platform order identifier (stored on ledger row).</param>
     /// <param name="hasDesignService">Whether a design-service upsell was included.</param>
+    /// <param name="bonusPoints">Optional fixed bonus points to award.</param>
+    /// <param name="reason">Optional reason for awarding points (e.g. "ReviewBonus").</param>
     /// <param name="ct">Cancellation token.</param>
     Task<EarnResult> EarnAsync(
         string externalUserId,
         decimal orderAmountEgp,
         string? orderReference = null,
         bool hasDesignService = false,
+        int? bonusPoints = null,
+        string? reason = null,
         CancellationToken ct = default);
 
     /// <summary>
