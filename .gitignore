@@ -1,0 +1,58 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.userprefs
+*.DotSettings.user
+TestResults/
+*.nupkg
+*.snupkg
+
+# EF Core migrations SQLite (we use PostgreSQL, but just in case)
+*.db
+*.db-shm
+*.db-wal
+
+# Environment / secrets — NEVER COMMIT
+.env
+.env.local
+.env.*.local
+appsettings.Production.json
+appsettings.Staging.json
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.local
+.cache/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+.docker/
+
+# Rider / JetBrains
+.idea/
+*.iml
+
+# VS Code (keep .vscode/extensions.json, ignore personal settings)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json.example
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+.gemini-prompts/

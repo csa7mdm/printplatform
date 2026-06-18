@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "getQuote": "اطلب تسعير",
+    "quotes": "طلبات التسعير",
+    "orders": "طلباتي",
+    "loyalty": "المكافآت",
+    "login": "تسجيل الدخول",
+    "register": "حساب جديد"
+  },
+  "home": {
+    "heroTitle": "حقق أفكارك في الواقع ثلاثي الأبعاد",
+    "heroSubtitle": "طباعة ثلاثية الأبعاد سريعة وعالية الجودة في جميع أنحاء مصر. ارفع تصميمك واحصل على تسعير فوري.",
+    "ctaQuote": "احصل على تسعير فوري",
+    "ctaJoin": "تمتلك طابعة؟ انضم لشبكتنا"
+  },
+  "auth": {
+    "loginTitle": "مرحباً بعودتك",
+    "registerTitle": "إنشاء حساب جديد",
+    "emailOrPhone": "البريد الإلكتروني أو رقم الهاتف",
+    "password": "كلمة المرور",
+    "nameAr": "الاسم الكامل (بالعربية)",
+    "nameEn": "الاسم الكامل (بالإنجليزية)",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "rememberMe": "تذكرني",
+    "submitLogin": "دخول",
+    "submitRegister": "إنشاء حساب",
+    "verifyWhatsApp": "تأكيد عبر واتساب",
+    "otpPlaceholder": "أدخل الرمز المكون من 6 أرقام"
+  },
+  "quote": {
+    "newTitle": "طلب تسعير جديد",
+    "uploadStep": "رفع النموذج ثلاثي الأبعاد",
+    "uploadDesc": "اسحب وأفلت ملف STL/3MF/OBJ، بحد أقصى 50 ميجابايت",
+    "materialStep": "الخامة والجودة",
+    "material": "الخامة",
+    "color": "اللون",
+    "quality": "جودة الطباعة",
+    "quantity": "الكمية",
+    "designService": "هل تحتاج إلى خدمات تصميم؟",
+    "getEstimate": "احصل على تسعير تقريبي",
+    "accept": "قبول التسعير",
+    "decline": "رفض",
+    "statusPending": "قيد المراجعة",
+    "statusPriced": "تم التسعير"
+  },
+  "order": {
+    "checkoutTitle": "إتمام الطلب",
+    "paymentMethod": "طريقة الدفع",
+    "payCOD": "الدفع عند الاستلام",
+    "payInstaPay": "إنستاباي",
+    "payVodafone": "فودافون كاش",
+    "payCard": "بطاقة ائتمان / خصم مباشر",
+    "confirmOrder": "تأكيد الطلب",
+    "statusTimeline": "حالة الطلب",
+    "qcPhotos": "صور الجودة",
+    "rateReview": "التقييم والمراجعة"
+  },
+  "loyalty": {
+    "title": "مكافآتي",
+    "tier": "المستوى الحالي",
+    "points": "رصيد النقاط",
+    "history": "سجل النقاط"
+  }
+}

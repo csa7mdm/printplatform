@@ -1,0 +1,54 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.API", "src\PrintPlatform.API\PrintPlatform.API.csproj", "{A1B2C3D4-0001-0001-0001-000000000001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Domain", "src\PrintPlatform.Domain\PrintPlatform.Domain.csproj", "{A1B2C3D4-0001-0001-0001-000000000002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Application", "src\PrintPlatform.Application\PrintPlatform.Application.csproj", "{A1B2C3D4-0001-0001-0001-000000000003}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Infrastructure", "src\PrintPlatform.Infrastructure\PrintPlatform.Infrastructure.csproj", "{A1B2C3D4-0001-0001-0001-000000000004}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Gamification", "src\packages\PrintPlatform.Gamification\PrintPlatform.Gamification.csproj", "{A1B2C3D4-0001-0001-0001-000000000005}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Loyalty", "src\packages\PrintPlatform.Loyalty\PrintPlatform.Loyalty.csproj", "{A1B2C3D4-0001-0001-0001-000000000006}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Domain.Tests", "tests\PrintPlatform.Domain.Tests\PrintPlatform.Domain.Tests.csproj", "{A1B2C3D4-0001-0001-0001-000000000007}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Application.Tests", "tests\PrintPlatform.Application.Tests\PrintPlatform.Application.Tests.csproj", "{A1B2C3D4-0001-0001-0001-000000000008}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Gamification.Tests", "tests\PrintPlatform.Gamification.Tests\PrintPlatform.Gamification.Tests.csproj", "{A1B2C3D4-0001-0001-0001-000000000009}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintPlatform.Loyalty.Tests", "tests\PrintPlatform.Loyalty.Tests\PrintPlatform.Loyalty.Tests.csproj", "{A1B2C3D4-0001-0001-0001-000000000010}"
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {A1B2C3D4-0001-0001-0001-000000000001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000001}.Release|Any CPU.Build.0 = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000008}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000009}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000009}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-0001-0001-0001-000000000010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    EndGlobalSection
+EndGlobal

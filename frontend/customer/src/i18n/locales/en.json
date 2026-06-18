@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "home": "Home",
+    "getQuote": "Get a Quote",
+    "quotes": "My Quotes",
+    "orders": "My Orders",
+    "loyalty": "Rewards",
+    "login": "Login",
+    "register": "Register"
+  },
+  "home": {
+    "heroTitle": "Bring Your Ideas to Life in 3D",
+    "heroSubtitle": "Fast, high-quality 3D printing across Egypt. Upload your design and get an instant quote.",
+    "ctaQuote": "Get an Instant Quote",
+    "ctaJoin": "Own a printer? Join our network"
+  },
+  "auth": {
+    "loginTitle": "Welcome Back",
+    "registerTitle": "Create an Account",
+    "emailOrPhone": "Email or Phone Number",
+    "password": "Password",
+    "nameAr": "Full Name (Arabic)",
+    "nameEn": "Full Name (English)",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "rememberMe": "Remember me",
+    "submitLogin": "Sign In",
+    "submitRegister": "Sign Up",
+    "verifyWhatsApp": "Verify via WhatsApp",
+    "otpPlaceholder": "Enter 6-digit code"
+  },
+  "quote": {
+    "newTitle": "Request a Quote",
+    "uploadStep": "Upload 3D Model",
+    "uploadDesc": "Drag and drop STL/3MF/OBJ file, max 50MB",
+    "materialStep": "Material & Quality",
+    "material": "Material",
+    "color": "Color",
+    "quality": "Quality Preset",
+    "quantity": "Quantity",
+    "designService": "Need Design Services?",
+    "getEstimate": "Get Instant Estimate",
+    "accept": "Accept Quote",
+    "decline": "Decline",
+    "statusPending": "Pending",
+    "statusPriced": "Priced"
+  },
+  "order": {
+    "checkoutTitle": "Checkout",
+    "paymentMethod": "Payment Method",
+    "payCOD": "Cash on Delivery",
+    "payInstaPay": "InstaPay",
+    "payVodafone": "Vodafone Cash",
+    "payCard": "Credit/Debit Card",
+    "confirmOrder": "Confirm Order",
+    "statusTimeline": "Order Status",
+    "qcPhotos": "Quality Control Photos",
+    "rateReview": "Rate & Review"
+  },
+  "loyalty": {
+    "title": "My Rewards",
+    "tier": "Current Tier",
+    "points": "Points Balance",
+    "history": "Points History"
+  }
+}
