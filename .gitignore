@@ -56,3 +56,7 @@ coverage/
 *.coveragexml
 
 .gemini-prompts/
+.dotnet-home/
+.appdata/
+bin/
+obj/
