@@ -18,7 +18,7 @@ namespace PrintPlatform.Infrastructure.Data;
 /// and the Identity domain aggregates (<see cref="User"/> and profiles). Dispatches
 /// domain events after a successful commit and applies a global soft-delete filter.
 /// </summary>
-public sealed class AppDbContext
+public sealed partial class AppDbContext
     : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IAppDbContext
 {
     private readonly IDomainEventDispatcher? _dispatcher;
@@ -29,20 +29,13 @@ public sealed class AppDbContext
         : base(options)
         => _dispatcher = dispatcher;
 
+    // -- Identity module (core; tied to IdentityDbContext) --------------------
     public DbSet<User> Users => Set<User>();
     public DbSet<CustomerProfile> CustomerProfiles => Set<CustomerProfile>();
     public DbSet<PrinterOwnerProfile> PrinterOwnerProfiles => Set<PrinterOwnerProfile>();
 
-    // -- Orders + Quoting module ------------------------------------------------
-    public DbSet<ModelFile> ModelFiles => Set<ModelFile>();
-    public DbSet<QuoteRequest> QuoteRequests => Set<QuoteRequest>();
-    public DbSet<Quote> Quotes => Set<Quote>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
-
-    // -- Dispatch module ------------------------------------------------------
-    public DbSet<JobAssignment> JobAssignments => Set<JobAssignment>();
-    public DbSet<QCRecord> QCRecords => Set<QCRecord>();
+    // NOTE: per-module DbSets live in AppDbContext.<Module>.cs partial files so a
+    // new module never edits this file. See AppDbContext.Orders.cs / .Dispatch.cs.
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

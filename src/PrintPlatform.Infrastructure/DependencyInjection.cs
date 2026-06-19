@@ -10,6 +10,7 @@ using PrintPlatform.Infrastructure.Dispatch;
 using PrintPlatform.Infrastructure.Identity;
 using PrintPlatform.Infrastructure.Integrations;
 using PrintPlatform.Infrastructure.Marketplace;
+using PrintPlatform.Infrastructure.Modules;
 using PrintPlatform.Infrastructure.Notifications;
 using PrintPlatform.Infrastructure.Shipping;
 
@@ -62,15 +63,11 @@ public static class DependencyInjection
         services.AddDataProtection()
             .SetApplicationName("PrintPlatform");
 
-        // -- Marketplace (supply side) ----------------------------------------
-        services.AddMarketplaceInfrastructure(configuration);
-        
-        // -- Dispatch (job routing) -------------------------------------------
-        services.AddDispatchInfrastructure();
-        services.AddScoped<IShippingService, BostaShippingService>();
-
-        // -- Integrations -----------------------------------------------------
-        services.AddIntegrationsInfrastructure(configuration);
+        // -- Vertical-slice modules (auto-discovered) -------------------------
+        // Each module registers itself via an IModuleInstaller in its own folder.
+        // Adding a module = adding an installer class; this file never changes.
+        // See PrintPlatform.Infrastructure.Modules.IModuleInstaller + ORCHESTRATION.md.
+        services.InstallModules(configuration);
 
         services.AddScoped<DatabaseSeeder>();
 

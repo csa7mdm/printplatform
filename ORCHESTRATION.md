@@ -52,6 +52,20 @@ Each module is a **vertical slice**. A module owns ONLY files under:
 
 ## Current status (living)
 - ✅ scaffold, Gamification pkg, Loyalty pkg, Marketplace module, 3 frontends
-- ⏳ Identity, Orders (partial), Dispatch, Finance, Integrations — to finish under this contract
-- ⏳ Wire & Verify (event handlers, migrations, integration tests)
-- ⏳ Layer-1 refactor (IModuleInstaller + partial AppDbContext) — orchestrator, on main first
+- ✅ **Solution builds green (0 errors)** — base-contract + integration repair done
+- ✅ **Layer-1 refactor DONE**: `IModuleInstaller` scan freezes `AddInfrastructure`
+  (`src/PrintPlatform.Infrastructure/Modules/IModuleInstaller.cs`); `AppDbContext` is
+  `partial` with per-module DbSets in `AppDbContext.<Module>.cs`. New modules now fan out
+  conflict-free.
+- ⏳ Finish partial Identity/Orders logic; build Finance module (add `FinanceModuleInstaller`
+  + `AppDbContext.Finance.cs` — no shared-file edits)
+- ⏳ EF migrations, run integration tests
+
+## How to add a module now (conflict-free)
+1. `git worktree add ../pp-worktrees/<unit> -b feat/<unit>`
+2. Create files only under the module's slice folders.
+3. Register services: add `Infrastructure/<Module>/<Module>ModuleInstaller.cs : IModuleInstaller`.
+4. Persistence: add `Infrastructure/Data/AppDbContext.<Module>.cs` partial (DbSets) +
+   `IEntityTypeConfiguration<T>` files (auto-applied via ApplyConfigurationsFromAssembly).
+5. Handlers/validators auto-register (MediatR/FluentValidation assembly scan) — no DI edits.
+6. Build green in the worktree, then orchestrator merges.
