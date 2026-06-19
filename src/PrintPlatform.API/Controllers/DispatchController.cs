@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PrintPlatform.Application.Abstractions;
 using PrintPlatform.Application.Dispatch;
 using PrintPlatform.Application.Dispatch.Commands;
 using PrintPlatform.Application.Dispatch.Queries;
@@ -57,8 +58,100 @@ public class DispatchController : ApiControllerBase
         var result = await Mediator.Send(new RejectJobCommand(id, CurrentUserId), ct);
         return ToActionResult(result);
     }
-    
-    // Other endpoints like /start, /complete, /qc/approve would follow the same pattern
+
+    [HttpPost("{id:guid}/start")]
+    [Authorize(Roles = "PrinterOwner")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> StartPrinting(Guid id, CancellationToken ct)
+    {
+        var result = await Mediator.Send(new StartPrintingCommand(id, CurrentUserId), ct);
+        return ToActionResult(result);
+    }
+
+    [HttpPost("{id:guid}/complete")]
+    [Authorize(Roles = "PrinterOwner")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CompleteJob(
+        Guid id,
+        [FromForm] UploadCompletionPhotosRequest request,
+        [FromServices] IFileStorageService storage,
+        CancellationToken ct)
+    {
+        if (request.Photos is null || request.Photos.Length < 3)
+        {
+            return Problem(Error.Validation(
+                "Dispatch.CompletionPhotos",
+                "At least 3 completion photos are required."));
+        }
+
+        var photoKeys = new List<string>(request.Photos.Length);
+        foreach (var photo in request.Photos)
+        {
+            var extension = Path.GetExtension(photo.FileName);
+            var objectKey = $"dispatch/completion-photos/{CurrentUserId}/{id}/{Guid.NewGuid():N}{extension}";
+
+            await using var stream = photo.OpenReadStream();
+            var photoKey = await storage.UploadAsync(
+                stream,
+                objectKey,
+                string.IsNullOrWhiteSpace(photo.ContentType) ? "application/octet-stream" : photo.ContentType,
+                cancellationToken: ct);
+
+            photoKeys.Add(photoKey);
+        }
+
+        var result = await Mediator.Send(new UploadCompletionPhotosCommand(id, CurrentUserId, photoKeys), ct);
+        return ToActionResult(result);
+    }
+
+    [HttpPost("{id:guid}/qc/approve")]
+    [Authorize(Roles = "Admin,Operator")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ApproveQc(
+        Guid id,
+        [FromBody] ApproveQcRequest request,
+        CancellationToken ct)
+    {
+        var result = await Mediator.Send(
+            new ApproveQcCommand(
+                id,
+                CurrentUserId,
+                request.Notes ?? string.Empty,
+                request.Photos ?? [],
+                request.Checklist ?? string.Empty),
+            ct);
+
+        return ToActionResult(result);
+    }
+
+    [HttpPost("{id:guid}/qc/reject")]
+    [Authorize(Roles = "Admin,Operator")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> RejectQc(
+        Guid id,
+        [FromBody] RejectQcRequest request,
+        CancellationToken ct)
+    {
+        var result = await Mediator.Send(
+            new RejectQcCommand(
+                id,
+                CurrentUserId,
+                request.Notes ?? string.Empty,
+                request.Photos ?? [],
+                request.Checklist ?? string.Empty,
+                request.NeedsReprint),
+            ct);
+
+        return ToActionResult(result);
+    }
 }
 
 public record AssignJobRequest(Guid OrderItemId, Guid PrinterId, Guid PrinterOwnerUserId, decimal PayoutAmount, string? OperatorNotes);
+
+public sealed record UploadCompletionPhotosRequest(IFormFile[]? Photos);
+
+public sealed record ApproveQcRequest(string? Notes, List<string>? Photos, string? Checklist);
+
+public sealed record RejectQcRequest(string? Notes, List<string>? Photos, string? Checklist, bool NeedsReprint);
