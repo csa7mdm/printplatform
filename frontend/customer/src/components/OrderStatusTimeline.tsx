@@ -13,7 +13,6 @@ export const OrderStatusTimeline: React.FC<{ currentStatus: OrderStatus }> = ({ 
       {steps.map((step, index) => {
         const isCompleted = index < currentIndex;
         const isCurrent = index === currentIndex;
-        const isPending = index > currentIndex;
 
         return (
           <div key={step} className="flex items-start gap-4">

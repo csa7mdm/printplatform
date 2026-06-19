@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { OrderStatusTimeline, OrderStatus as TimelineStatus } from '../components/OrderStatusTimeline';
 import { useOrderDetails, useCancelOrder } from '../api/hooks';
 import { OrderStatus } from '../api/types';
@@ -27,8 +27,7 @@ const mapBackendStatusToTimeline = (status: OrderStatus): TimelineStatus => {
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  
+
   const { data: order, isLoading, error } = useOrderDetails(id!, { enabled: !!id });
   const cancelOrderMutation = useCancelOrder();
 
