@@ -12,18 +12,72 @@ const mockTimeline = [
   { id: '4', label: 'Delivered', isCompleted: false, isCurrent: false },
 ];
 
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import StatusChip from '../components/StatusChip';
+import JobTimeline from '../components/JobTimeline';
+import QCPhotoGrid from '../components/QCPhotoGrid';
+import { CheckCircle, XCircle } from 'lucide-react';
+import { useQcApprove, useQcReject } from '../api/hooks';
+
+const mockTimeline = [
+  { id: '1', label: 'Assigned', date: '2023-11-19', isCompleted: true, isCurrent: false },
+  { id: '2', label: 'Printing', date: '2023-11-19', isCompleted: true, isCurrent: false },
+  { id: '3', label: 'QC Review', date: '2023-11-21', isCompleted: false, isCurrent: true },
+  { id: '4', label: 'Delivered', isCompleted: false, isCurrent: false },
+];
+
 export default function JobDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
+  const approveMutation = useQcApprove();
+  const rejectMutation = useQcReject();
+
   const isQcPending = true;
+
+  const handleApprove = () => {
+    if (!id) return;
+    approveMutation.mutate({
+      jobAssignmentId: id,
+      notes: 'QC check passed by operator',
+      photos: [],
+      checklist: '{"dimensionsMatch":true,"noVisibleStringing":true,"correctMaterial":true}',
+    }, {
+      onSuccess: () => {
+        alert('QC Approved successfully!');
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Failed to approve QC.');
+      }
+    });
+  };
+
+  const handleConfirmRejection = () => {
+    if (!id || !rejectReason) return;
+    rejectMutation.mutate({
+      jobAssignmentId: id,
+      notes: rejectReason,
+      photos: [],
+      checklist: '{"dimensionsMatch":false,"noVisibleStringing":false,"correctMaterial":false}',
+      needsReprint: true,
+    }, {
+      onSuccess: () => {
+        alert('QC Rejection submitted successfully.');
+        setShowRejectModal(false);
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Failed to reject QC.');
+      }
+    });
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Job: {id}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Job: {id?.slice(0, 8)}</h2>
           <p className="text-sm text-gray-500 mt-1">Order Ref: ORD-5002 • Owner: Cairo 3D Hub</p>
         </div>
         <StatusChip status="qc_pending" />
@@ -56,23 +110,27 @@ export default function JobDetail() {
               <h4 className="text-sm font-medium text-gray-700 mb-3">QC Checklist</h4>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-start">
-                  <input type="checkbox" className="mt-1 mr-3 h-4 w-4 text-primary-600 rounded border-gray-300" />
+                  <input type="checkbox" defaultChecked className="mt-1 mr-3 h-4 w-4 text-primary-600 rounded border-gray-300" />
                   <span className="text-sm text-gray-700">Dimensions match specifications</span>
                 </li>
                 <li className="flex items-start">
-                  <input type="checkbox" className="mt-1 mr-3 h-4 w-4 text-primary-600 rounded border-gray-300" />
+                  <input type="checkbox" defaultChecked className="mt-1 mr-3 h-4 w-4 text-primary-600 rounded border-gray-300" />
                   <span className="text-sm text-gray-700">No visible stringing or layer shifts</span>
                 </li>
                 <li className="flex items-start">
-                  <input type="checkbox" className="mt-1 mr-3 h-4 w-4 text-primary-600 rounded border-gray-300" />
+                  <input type="checkbox" defaultChecked className="mt-1 mr-3 h-4 w-4 text-primary-600 rounded border-gray-300" />
                   <span className="text-sm text-gray-700">Correct material and color used</span>
                 </li>
               </ul>
 
               <div className="flex gap-4">
-                <button className="flex-1 flex items-center justify-center bg-green-600 text-white py-2 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-green-700">
+                <button 
+                  onClick={handleApprove}
+                  disabled={approveMutation.isPending}
+                  className="flex-1 flex items-center justify-center bg-green-600 text-white py-2 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                >
                   <CheckCircle className="w-5 h-5 mr-2" />
-                  Approve QC
+                  {approveMutation.isPending ? 'Approving...' : 'Approve QC'}
                 </button>
                 <button 
                   onClick={() => setShowRejectModal(true)}
@@ -101,13 +159,19 @@ export default function JobDetail() {
             ></textarea>
             <div className="flex justify-end gap-3">
               <button 
+                type="button"
                 onClick={() => setShowRejectModal(false)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">
-                Confirm Rejection
+              <button 
+                type="button"
+                onClick={handleConfirmRejection}
+                disabled={rejectMutation.isPending}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50"
+              >
+                {rejectMutation.isPending ? 'Submitting...' : 'Confirm Rejection'}
               </button>
             </div>
           </div>
@@ -115,4 +179,4 @@ export default function JobDetail() {
       )}
     </div>
   );
-}
+}

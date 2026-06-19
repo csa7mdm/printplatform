@@ -1,16 +1,28 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../api/hooks';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const loginMutation = useLogin();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('operator_token', 'demo-token');
-    navigate('/dashboard');
+    loginMutation.mutate({
+      email,
+      password,
+    }, {
+      onSuccess: () => {
+        navigate('/dashboard');
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+      }
+    });
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

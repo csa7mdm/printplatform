@@ -2,27 +2,71 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ModelPreview3D from '../components/ModelPreview3D';
 import RankedPrinterList, { PrinterOption } from '../components/RankedPrinterList';
-
-const mockPrinters: PrinterOption[] = [
-  { id: 'PRN-001', ownerName: 'Mahmoud Ali', printerModel: 'Creality Ender 3 V2', certStars: 4.8, distanceKm: 2.5, activeJobs: 1, matchScore: 95 },
-  { id: 'PRN-002', ownerName: 'Cairo 3D Hub', printerModel: 'Prusa i3 MK3S+', certStars: 5.0, distanceKm: 8.2, activeJobs: 3, matchScore: 88 },
-  { id: 'PRN-003', ownerName: 'Youssef Prints', printerModel: 'Anycubic Vyper', certStars: 4.2, distanceKm: 1.1, activeJobs: 0, matchScore: 75 },
-];
+import { useAvailablePrintersForJob, useAssignJob } from '../api/hooks';
 
 export default function DispatchAssign() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>(); // orderItemId
   const navigate = useNavigate();
   const [selectedPrinter, setSelectedPrinter] = useState<string | null>(null);
 
+  const { data: availablePrinters, isLoading, error } = useAvailablePrintersForJob(id!, {
+    enabled: !!id,
+  });
+  const assignMutation = useAssignJob();
+
   const handleAssign = () => {
-    if (!selectedPrinter) return;
-    navigate('/dispatch');
+    if (!selectedPrinter || !id || !availablePrinters) return;
+
+    const matched = availablePrinters.find(p => p.printer.id === selectedPrinter);
+    if (!matched) return;
+
+    assignMutation.mutate({
+      orderItemId: id,
+      printerId: selectedPrinter,
+      printerOwnerUserId: matched.printer.printerOwnerProfileId,
+      payoutAmount: 380, // fallback or price to owner
+      operatorNotes: 'Assigned via operator portal',
+    }, {
+      onSuccess: () => {
+        alert('Job assigned successfully!');
+        navigate('/dispatch');
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Failed to assign job.');
+      }
+    });
   };
+
+  const mappedPrinters: PrinterOption[] = (availablePrinters || []).map(p => ({
+    id: p.printer.id,
+    ownerName: `Owner #${p.printer.printerOwnerProfileId.slice(0, 8)}`,
+    printerModel: `${p.printer.brand} ${p.printer.model}`,
+    certStars: p.certificationScore * 5 || 5.0,
+    distanceKm: parseFloat(p.distanceKm.toFixed(1)),
+    activeJobs: 1, // approximate load
+    matchScore: Math.round(p.score * 100) || 85,
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="py-12 text-center text-gray-500">
+        Finding eligible printers...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-12 text-center text-red-500">
+        Failed to load available printers.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Assign Order: {id}</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Assign Order: {id?.slice(0, 8)}</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -33,24 +77,12 @@ export default function DispatchAssign() {
           </div>
           <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
             <div>
-              <span className="text-gray-500 block">Customer</span>
-              <p className="font-medium text-gray-900">Khaled M.</p>
+              <span className="text-gray-500 block">Order Item ID</span>
+              <p className="font-medium text-gray-900">{id}</p>
             </div>
             <div>
-              <span className="text-gray-500 block">Material</span>
-              <p className="font-medium text-gray-900">PLA (White)</p>
-            </div>
-            <div>
-              <span className="text-gray-500 block">Weight</span>
-              <p className="font-medium text-gray-900">145g</p>
-            </div>
-            <div>
-              <span className="text-gray-500 block">Est. Time</span>
-              <p className="font-medium text-gray-900">4.5h</p>
-            </div>
-            <div>
-              <span className="text-gray-500 block">Delivery Deadline</span>
-              <p className="font-medium text-gray-900">2023-11-25</p>
+              <span className="text-gray-500 block">Country</span>
+              <p className="font-medium text-gray-900">Egypt</p>
             </div>
             <div>
               <span className="text-gray-500 block">Price to Owner</span>
@@ -67,7 +99,7 @@ export default function DispatchAssign() {
 
           <div className="flex-1 overflow-y-auto pr-2">
             <RankedPrinterList
-              printers={mockPrinters}
+              printers={mappedPrinters}
               selectedId={selectedPrinter}
               onSelect={setSelectedPrinter}
             />
@@ -76,18 +108,18 @@ export default function DispatchAssign() {
           <div className="mt-6 pt-4 border-t border-gray-200">
             <button
               onClick={handleAssign}
-              disabled={!selectedPrinter}
+              disabled={!selectedPrinter || assignMutation.isPending}
               className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                selectedPrinter
+                selectedPrinter && !assignMutation.isPending
                   ? 'bg-primary-600 hover:bg-primary-700'
                   : 'bg-gray-300 cursor-not-allowed'
               }`}
             >
-              Confirm Assignment
+              {assignMutation.isPending ? 'Assigning...' : 'Confirm Assignment'}
             </button>
           </div>
         </div>
       </div>
     </div>
   );
-}
+}

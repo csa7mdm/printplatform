@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-form'; // Wait, I need react-hook-form
 import { useForm as useHookForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useLogin } from '../api/hooks';
 
 const schema = z.object({
   identifier: z.string().min(1, { message: 'Required' }),
@@ -14,13 +14,24 @@ type LoginForm = z.infer<typeof schema>;
 
 export default function Login() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const loginMutation = useLogin();
   const { register, handleSubmit, formState: { errors } } = useHookForm<LoginForm>({
     resolver: zodResolver(schema)
   });
 
   const onSubmit = (data: LoginForm) => {
-    console.log('Login data', data);
-    // TODO: implement login mutation
+    loginMutation.mutate({
+      email: data.identifier,
+      password: data.password,
+    }, {
+      onSuccess: () => {
+        navigate('/');
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+      }
+    });
   };
 
   return (
@@ -53,8 +64,12 @@ export default function Login() {
           <label htmlFor="remember" className="text-sm text-gray-600">{t('auth.rememberMe')}</label>
         </div>
 
-        <button type="submit" className="w-full bg-brand text-white py-2 rounded-md font-bold hover:bg-blue-600 transition">
-          {t('auth.submitLogin')}
+        <button 
+          type="submit" 
+          disabled={loginMutation.isPending}
+          className="w-full bg-brand text-white py-2 rounded-md font-bold hover:bg-blue-600 transition disabled:opacity-50"
+        >
+          {loginMutation.isPending ? 'Logging in...' : t('auth.submitLogin')}
         </button>
       </form>
       
@@ -64,3 +79,4 @@ export default function Login() {
     </div>
   );
 }
+

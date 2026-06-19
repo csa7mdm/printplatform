@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ModelPreview3D from '../components/ModelPreview3D';
+import { useConfirmQuote } from '../api/hooks';
 
 export default function QuoteReview() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const confirmMutation = useConfirmQuote();
   
   const [formData, setFormData] = useState({
     weightGrams: '150',
@@ -15,12 +17,28 @@ export default function QuoteReview() {
   });
 
   const handleConfirm = () => {
-    navigate('/quotes');
+    if (!id) return;
+    confirmMutation.mutate({
+      quoteRequestId: id,
+      overrideCustomerPriceEgp: Number(formData.priceEGP),
+      operatorNotes: formData.notes,
+      overrideValidUntil: new Date(formData.deliveryDate).toISOString(),
+    }, {
+      onSuccess: () => {
+        alert('Quote confirmed successfully!');
+        navigate('/quotes');
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Failed to confirm quote.');
+      }
+    });
   };
 
   const handleReject = () => {
+    // Navigate back to queue for reject action
     navigate('/quotes');
   };
+
 
   return (
     <div className="space-y-6">
@@ -110,10 +128,11 @@ export default function QuoteReview() {
             <div className="pt-4 flex gap-3">
               <button
                 type="button"
+                disabled={confirmMutation.isPending}
                 onClick={handleConfirm}
-                className="flex-1 bg-primary-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="flex-1 bg-primary-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
               >
-                Confirm Quote
+                {confirmMutation.isPending ? 'Confirming...' : 'Confirm Quote'}
               </button>
               <button
                 type="button"
@@ -128,4 +147,4 @@ export default function QuoteReview() {
       </div>
     </div>
   );
-}
+}

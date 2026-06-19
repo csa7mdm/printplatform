@@ -3,6 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRegisterCustomer, useVerifyOtp } from '../api/hooks';
+import { Lang } from '../api/types';
 
 const schema = z.object({
   nameAr: z.string().min(2, { message: 'Required' }),
@@ -15,24 +18,56 @@ const schema = z.object({
 type RegisterForm = z.infer<typeof schema>;
 
 export default function Register() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
   const [phone, setPhone] = useState('');
+  const [userId, setUserId] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   
+  const registerMutation = useRegisterCustomer();
+  const verifyOtpMutation = useVerifyOtp();
+
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
     resolver: zodResolver(schema)
   });
 
   const onSubmit = (data: RegisterForm) => {
-    console.log('Register data', data);
-    setPhone(data.phone);
-    setStep(2);
+    const lang = i18n.language === 'ar' ? Lang.Arabic : Lang.English;
+    registerMutation.mutate({
+      email: data.email,
+      phoneNumber: data.phone,
+      password: data.password,
+      fullNameAr: data.nameAr,
+      fullNameEn: data.nameEn,
+      lang: lang
+    }, {
+      onSuccess: (res) => {
+        setPhone(data.phone);
+        setUserId(res.userId);
+        setStep(2);
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Registration failed. Please try again.');
+      }
+    });
   };
 
   const onVerify = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Verifying OTP for', phone);
-    // TODO: implement OTP logic
+    if (!otpCode) return;
+    verifyOtpMutation.mutate({
+      userId,
+      code: otpCode,
+    }, {
+      onSuccess: () => {
+        alert('Verification successful! You can now log in.');
+        navigate('/login');
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.detail || 'Invalid OTP. Please check the code.');
+      }
+    });
   };
 
   if (step === 2) {
@@ -45,11 +80,17 @@ export default function Register() {
         <form onSubmit={onVerify} className="space-y-4">
           <input 
             type="text" 
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.target.value)}
             placeholder={t('auth.otpPlaceholder')}
             className="w-full border rounded-md px-3 py-2 text-center text-xl tracking-widest outline-none focus:ring-2 focus:ring-brand" 
           />
-          <button type="submit" className="w-full bg-brand text-white py-2 rounded-md font-bold hover:bg-blue-600">
-            Verify
+          <button 
+            type="submit" 
+            disabled={verifyOtpMutation.isPending}
+            className="w-full bg-brand text-white py-2 rounded-md font-bold hover:bg-blue-600 disabled:opacity-50"
+          >
+            {verifyOtpMutation.isPending ? 'Verifying...' : 'Verify'}
           </button>
         </form>
       </div>
@@ -91,10 +132,15 @@ export default function Register() {
           {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
         </div>
 
-        <button type="submit" className="w-full bg-brand text-white py-2 rounded-md font-bold hover:bg-blue-600 transition">
-          {t('auth.submitRegister')}
+        <button 
+          type="submit" 
+          disabled={registerMutation.isPending}
+          className="w-full bg-brand text-white py-2 rounded-md font-bold hover:bg-blue-600 transition disabled:opacity-50"
+        >
+          {registerMutation.isPending ? 'Registering...' : t('auth.submitRegister')}
         </button>
       </form>
     </div>
   );
 }
+

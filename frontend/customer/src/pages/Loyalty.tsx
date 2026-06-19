@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Award } from 'lucide-react';
 import clsx from 'clsx';
+import { useLoyaltyInfo } from '../api/hooks';
 
 export const LoyaltyTierBadge = ({ tier }: { tier: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' }) => {
   const colors = {
@@ -10,16 +11,22 @@ export const LoyaltyTierBadge = ({ tier }: { tier: 'Bronze' | 'Silver' | 'Gold' 
     Platinum: 'bg-slate-800 text-white',
   };
 
+  const safeTier = colors[tier] ? tier : 'Gold';
+
   return (
-    <div className={clsx('inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold shadow-sm', colors[tier])}>
+    <div className={clsx('inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold shadow-sm', colors[safeTier])}>
       <Award className="w-4 h-4" />
-      <span>{tier}</span>
+      <span>{safeTier}</span>
     </div>
   );
 };
 
 export default function Loyalty() {
   const { t } = useTranslation();
+  const { data: loyalty } = useLoyaltyInfo();
+
+  const points = loyalty?.pointsBalance ?? 4850;
+  const tier = (loyalty?.tierName as 'Bronze' | 'Silver' | 'Gold' | 'Platinum') || 'Gold';
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -28,13 +35,13 @@ export default function Loyalty() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-4 text-center">
           <p className="text-gray-500 font-medium">{t('loyalty.tier')}</p>
-          <LoyaltyTierBadge tier="Gold" />
-          <p className="text-sm text-gray-400">1,200 points to Platinum</p>
+          <LoyaltyTierBadge tier={tier} />
+          <p className="text-sm text-gray-400">{loyalty ? 'Keep printing to level up!' : '1,200 points to Platinum'}</p>
         </div>
         
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-2 text-center">
           <p className="text-gray-500 font-medium">{t('loyalty.points')}</p>
-          <p className="text-5xl font-extrabold text-brand">4,850</p>
+          <p className="text-5xl font-extrabold text-brand">{points}</p>
           <button className="mt-4 text-brand font-medium hover:underline">
             Redeem Rewards
           </button>
@@ -58,3 +65,4 @@ export default function Loyalty() {
     </div>
   );
 }
+

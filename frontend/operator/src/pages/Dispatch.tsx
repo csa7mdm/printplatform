@@ -1,12 +1,27 @@
 import { Link } from 'react-router-dom';
 import StatusChip from '../components/StatusChip';
-
-const mockOrders = [
-  { id: 'ORD-5001', customer: 'Khaled M.', material: 'PLA', price: 450, date: '2023-11-20', status: 'ready' },
-  { id: 'ORD-5002', customer: 'Nour E.', material: 'Resin', price: 1200, date: '2023-11-20', status: 'ready' },
-];
+import { usePendingDispatch } from '../api/hooks';
+import { JobAssignmentStatus } from '../api/types';
 
 export default function Dispatch() {
+  const { data: jobs, isLoading, error } = usePendingDispatch();
+
+  if (isLoading) {
+    return (
+      <div className="py-12 text-center text-gray-500">
+        Loading pending dispatch items...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-12 text-center text-red-500">
+        Failed to load pending dispatch items.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -15,34 +30,30 @@ export default function Dispatch() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockOrders.map(order => (
-          <div key={order.id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col">
+        {jobs && jobs.map(job => (
+          <div key={job.id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">{order.id}</h3>
-                <p className="text-sm text-gray-500">{order.customer}</p>
+                <h3 className="text-lg font-bold text-gray-900">Job Assignment #{job.id.slice(0, 8)}</h3>
+                <p className="text-sm text-gray-500">Order Item #{job.orderItemId.slice(0, 8)}</p>
               </div>
-              <StatusChip status={order.status} />
+              <StatusChip status={job.status === JobAssignmentStatus.Offered ? 'pending' : 'ready'} />
             </div>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <span className="text-xs text-gray-500 block">Material</span>
-                <span className="text-sm font-medium text-gray-900">{order.material}</span>
+                <span className="text-xs text-gray-500 block">Payout to Owner</span>
+                <span className="text-sm font-medium text-gray-900">{job.payoutAmount} EGP</span>
               </div>
               <div>
-                <span className="text-xs text-gray-500 block">Price</span>
-                <span className="text-sm font-medium text-gray-900">{order.price} EGP</span>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500 block">Confirmed</span>
-                <span className="text-sm font-medium text-gray-900">{new Date(order.date).toLocaleDateString()}</span>
+                <span className="text-xs text-gray-500 block">Offered At</span>
+                <span className="text-sm font-medium text-gray-900">{new Date(job.offeredAt).toLocaleDateString()}</span>
               </div>
             </div>
 
             <div className="mt-auto pt-4 border-t border-gray-100">
               <Link
-                to={`/dispatch/${order.id}/assign`}
+                to={`/dispatch/${job.orderItemId}/assign`}
                 className="w-full block text-center bg-primary-50 text-primary-700 hover:bg-primary-100 py-2 px-4 rounded-md text-sm font-medium transition-colors"
               >
                 Find Printer & Assign
@@ -50,7 +61,7 @@ export default function Dispatch() {
             </div>
           </div>
         ))}
-        {mockOrders.length === 0 && (
+        {(!jobs || jobs.length === 0) && (
           <div className="col-span-full py-12 text-center text-gray-500 bg-white rounded-lg border border-gray-200 border-dashed">
             No orders awaiting dispatch.
           </div>
@@ -58,4 +69,4 @@ export default function Dispatch() {
       </div>
     </div>
   );
-}
+}
