@@ -3,6 +3,7 @@ using NSubstitute;
 using PrintPlatform.Application.Events;
 using PrintPlatform.Domain.Shared;
 using FluentAssertions;
+using Xunit;
 
 namespace PrintPlatform.Application.Tests.Events;
 

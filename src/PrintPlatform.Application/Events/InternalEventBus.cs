@@ -10,7 +10,7 @@ namespace PrintPlatform.Application.Events;
 /// published so that any registered <see cref="INotificationHandler{TNotification}"/>
 /// can react to it.
 /// </summary>
-internal sealed class InternalEventBus : IDomainEventDispatcher
+public sealed class InternalEventBus : IDomainEventDispatcher
 {
     private readonly IPublisher _publisher;
 
