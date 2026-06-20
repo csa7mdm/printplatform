@@ -45,6 +45,12 @@ try
         .AddGamification(builder.Configuration)
         .AddLoyalty(builder.Configuration);
 
+    // Current-user accessor (HTTP-bound) — required by Identity handlers.
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<
+        PrintPlatform.Application.Identity.Abstractions.ICurrentUserAccessor,
+        PrintPlatform.API.Identity.HttpCurrentUserAccessor>();
+
     // -----------------------------------------------------------------------
     // Authentication — JWT Bearer
     // -----------------------------------------------------------------------

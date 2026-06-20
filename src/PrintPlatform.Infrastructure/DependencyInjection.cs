@@ -35,6 +35,13 @@ public static class DependencyInjection
             opts.UseNpgsql(connectionString, npgsql =>
                 npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
+        // Expose AppDbContext through the Application-layer abstraction so handlers
+        // can depend on IAppDbContext without referencing Infrastructure.
+        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+
+        // Clock abstraction used by pricing/quote logic.
+        services.AddSingleton(TimeProvider.System);
+
         // -- ASP.NET Core Identity --------------------------------------------
         services
             .AddIdentityCore<ApplicationUser>(opts =>
