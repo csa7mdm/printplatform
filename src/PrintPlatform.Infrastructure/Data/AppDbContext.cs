@@ -30,7 +30,9 @@ public sealed partial class AppDbContext
         => _dispatcher = dispatcher;
 
     // -- Identity module (core; tied to IdentityDbContext) --------------------
-    public DbSet<User> Users => Set<User>();
+    // Intentionally shadows IdentityUserContext.Users (ApplicationUser) — the domain
+    // User aggregate is distinct from the ASP.NET Identity credential entity.
+    public new DbSet<User> Users => Set<User>();
     public DbSet<CustomerProfile> CustomerProfiles => Set<CustomerProfile>();
     public DbSet<PrinterOwnerProfile> PrinterOwnerProfiles => Set<PrinterOwnerProfile>();
 

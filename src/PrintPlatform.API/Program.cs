@@ -143,9 +143,10 @@ try
         .AddS3(s3 =>
             {
                 var storage = builder.Configuration.GetSection("Storage");
-                s3.AccessKey = storage["AccessKey"];
-                s3.SecretKey = storage["SecretKey"];
-                s3.BucketName = storage["BucketName"];
+                s3.Credentials = new Amazon.Runtime.BasicAWSCredentials(
+                    storage["AccessKey"] ?? string.Empty,
+                    storage["SecretKey"] ?? string.Empty);
+                s3.BucketName = storage["BucketName"] ?? string.Empty;
                 s3.S3Config = new Amazon.S3.AmazonS3Config
                 {
                     ServiceURL = storage["Endpoint"],
@@ -171,7 +172,7 @@ try
     app.UseSerilogRequestLogging(opts =>
         opts.EnrichDiagnosticContext = (diag, ctx) =>
         {
-            diag.Set("RequestHost",   ctx.Request.Host.Value);
+            diag.Set("RequestHost",   ctx.Request.Host.Value ?? string.Empty);
             diag.Set("RequestScheme", ctx.Request.Scheme);
         });
 

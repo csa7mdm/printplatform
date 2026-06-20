@@ -44,7 +44,7 @@ public sealed class Result<TValue> : Result
         ? _value!
         : throw new InvalidOperationException("Cannot access the value of a failed result.");
 
-    public new static Result<TValue> Success(TValue value) => new(value);
+    public static Result<TValue> Success(TValue value) => new(value);
     public new static Result<TValue> Failure(Error error) => new(error);
 
     /// <summary>Implicit conversion so callers can return a value directly.</summary>

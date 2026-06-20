@@ -12,13 +12,13 @@ namespace PrintPlatform.Infrastructure.Data.Configurations
         {
             var converter = new ValueConverter<T, string>(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                v => JsonSerializer.Deserialize<T>(v, (JsonSerializerOptions?)null)
+                v => JsonSerializer.Deserialize<T>(v, (JsonSerializerOptions?)null)!
             );
 
             var comparer = new ValueComparer<T>(
                 (c1, c2) => JsonSerializer.Serialize(c1, (JsonSerializerOptions?)null) == JsonSerializer.Serialize(c2, (JsonSerializerOptions?)null),
                 c => c == null ? 0 : JsonSerializer.Serialize(c, (JsonSerializerOptions?)null).GetHashCode(),
-                c => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(c, (JsonSerializerOptions?)null), (JsonSerializerOptions?)null)
+                c => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(c, (JsonSerializerOptions?)null), (JsonSerializerOptions?)null)!
             );
 
             propertyBuilder.HasConversion(converter);
