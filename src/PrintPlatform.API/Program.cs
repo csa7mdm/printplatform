@@ -233,10 +233,10 @@ catch (Exception ex) when (ex is not HostAbortedException)
 }
 finally
 {
-    await Log.CloseAndFlushAsync();
+    Log.CloseAndFlush();
 }
 
 return 0;
 
-// Exposed for WebApplicationFactory in integration tests.
+// Exposed so integration tests can reference the entry-point assembly's Program type.
 public partial class Program { }
