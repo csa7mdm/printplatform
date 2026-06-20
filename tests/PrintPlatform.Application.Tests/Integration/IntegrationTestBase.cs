@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PrintPlatform.Gamification.Data;
 using PrintPlatform.Infrastructure.Data;
+using PrintPlatform.Loyalty.Data;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -19,30 +23,40 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await DbContainer.StartAsync();
+        var connectionString = DbContainer.GetConnectionString();
 
         var factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
-                builder.ConfigureServices(services =>
-                {
-                    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                    if (descriptor != null) services.Remove(descriptor);
+                builder.UseEnvironment("Testing");
 
-                    services.AddDbContext<AppDbContext>(options => options.UseNpgsql(DbContainer.GetConnectionString()));
-                    
-                    // Do the same for Gamification and Loyalty if they have separate connections in tests
+                // Point EVERY connection (all DbContexts + Hangfire) at the test container
+                // so the app boots fully isolated from any local Postgres.
+                builder.ConfigureAppConfiguration((_, config) =>
+                {
+                    config.AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["ConnectionStrings:DefaultConnection"] = connectionString,
+                        ["ConnectionStrings:HangfireConnection"] = connectionString,
+                        ["ConnectionStrings:Marketplace"] = connectionString,
+                        ["ConnectionStrings:Gamification"] = connectionString,
+                        ["ConnectionStrings:Loyalty"] = connectionString,
+                    });
                 });
             });
 
         Client = factory.CreateClient();
         Services = factory.Services;
 
+        // Create schema for every context, then seed reference data.
         using var scope = Services.CreateScope();
-        var appDb = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await appDb.Database.EnsureCreatedAsync();
-        
-        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-        await seeder.SeedAsync();
+        var sp = scope.ServiceProvider;
+        await sp.GetRequiredService<AppDbContext>().Database.EnsureCreatedAsync();
+        await sp.GetRequiredService<MarketplaceDbContext>().Database.EnsureCreatedAsync();
+        await sp.GetRequiredService<GamificationDbContext>().Database.EnsureCreatedAsync();
+        await sp.GetRequiredService<LoyaltyDbContext>().Database.EnsureCreatedAsync();
+
+        await sp.GetRequiredService<DatabaseSeeder>().SeedAsync();
     }
 
     public async Task DisposeAsync()

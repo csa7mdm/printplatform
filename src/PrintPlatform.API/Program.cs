@@ -118,11 +118,16 @@ try
            .UseRecommendedSerializerSettings()
            .UsePostgreSqlStorage(opts => opts.UseNpgsqlConnection(hangfireConn)));
 
-    builder.Services.AddHangfireServer(opts =>
+    // The background server eagerly connects to storage; skip it under integration
+    // tests (they don't exercise background workers and shouldn't depend on it).
+    if (!builder.Environment.IsEnvironment("Testing"))
     {
-        opts.WorkerCount  = Environment.ProcessorCount * 2;
-        opts.Queues       = ["critical", "default", "low"];
-    });
+        builder.Services.AddHangfireServer(opts =>
+        {
+            opts.WorkerCount  = Environment.ProcessorCount * 2;
+            opts.Queues       = ["critical", "default", "low"];
+        });
+    }
 
     // -----------------------------------------------------------------------
     // Controllers, Health Checks, Exception Handling
@@ -196,19 +201,25 @@ try
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
     });
 
-    // Hangfire dashboard (restrict to local/admin in production)
-    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    // Hangfire dashboard + recurring jobs both touch storage at startup;
+    // skip under integration tests.
+    if (!app.Environment.IsEnvironment("Testing"))
     {
-        // TODO: add authorization filter before going to production.
-        // Authorization = [new HangfireDashboardAuthFilter()]
-    });
-    
-    // Register recurring jobs
-    HangfireJobRegistrar.RegisterJobs();
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            // TODO: add authorization filter before going to production.
+            // Authorization = [new HangfireDashboardAuthFilter()]
+        });
+
+        // Register recurring jobs
+        HangfireJobRegistrar.RegisterJobs();
+    }
 
     // -- Seed database ------------------------------------------------------
-    using (var scope = app.Services.CreateScope())
+    // Skipped under integration tests, where the test harness owns schema + seeding.
+    if (!app.Environment.IsEnvironment("Testing"))
     {
+        using var scope = app.Services.CreateScope();
         var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
         await seeder.SeedAsync();
     }
@@ -226,3 +237,6 @@ finally
 }
 
 return 0;
+
+// Exposed for WebApplicationFactory in integration tests.
+public partial class Program { }
