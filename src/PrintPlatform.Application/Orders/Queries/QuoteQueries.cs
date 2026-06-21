@@ -6,33 +6,30 @@ using PrintPlatform.Domain.Shared;
 
 namespace PrintPlatform.Application.Orders.Queries;
 
-/// <summary>Lists quotes for the calling customer, newest first.</summary>
+/// <summary>Lists all quote requests for the calling customer, newest first.</summary>
 public sealed record GetMyQuotesQuery(Guid CustomerUserId)
-    : IRequest<Result<IReadOnlyList<QuoteDto>>>;
+    : IRequest<Result<IReadOnlyList<PendingQuoteDto>>>;
 
 public sealed class GetMyQuotesHandler
-    : IRequestHandler<GetMyQuotesQuery, Result<IReadOnlyList<QuoteDto>>>
+    : IRequestHandler<GetMyQuotesQuery, Result<IReadOnlyList<PendingQuoteDto>>>
 {
     private readonly IAppDbContext _db;
 
     public GetMyQuotesHandler(IAppDbContext db) => _db = db;
 
-    public async Task<Result<IReadOnlyList<QuoteDto>>> Handle(
+    public async Task<Result<IReadOnlyList<PendingQuoteDto>>> Handle(
         GetMyQuotesQuery request, CancellationToken cancellationToken)
     {
-        var quotes = await _db.Quotes
+        var quotes = await _db.QuoteRequests
             .AsNoTracking()
-            .Join(
-                _db.QuoteRequests.AsNoTracking(),
-                quote => quote.QuoteRequestId,
-                quoteRequest => quoteRequest.Id,
-                (quote, quoteRequest) => new { quote, quoteRequest })
-            .Where(x => x.quoteRequest.CustomerUserId == request.CustomerUserId)
-            .OrderByDescending(x => x.quote.ValidUntil)
-            .Select(x => ModelFileMapper.ToDto(x.quote))
+            .Where(q => q.CustomerUserId == request.CustomerUserId)
+            .OrderByDescending(q => q.CreatedAt)
+            .Select(q => new PendingQuoteDto(
+                q.Id, q.ModelFileId, q.CustomerUserId, q.MaterialOptionId,
+                q.QualityPreset, q.Quantity, q.IncludeDesignService, q.Status, q.CreatedAt))
             .ToListAsync(cancellationToken);
 
-        return Result.Success<IReadOnlyList<QuoteDto>>(quotes);
+        return Result.Success<IReadOnlyList<PendingQuoteDto>>(quotes);
     }
 }
 
