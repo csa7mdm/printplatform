@@ -36,9 +36,9 @@ public sealed class QuotesController : ApiControllerBase
         return ToActionResult(result);
     }
 
-    /// <summary>Lists quotes for the authenticated customer.</summary>
+    /// <summary>Lists all quote requests for the authenticated customer.</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<QuoteDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IReadOnlyList<PendingQuoteDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetMine(CancellationToken ct)
     {
         var result = await Mediator.Send(new GetMyQuotesQuery(CurrentUserId), ct);

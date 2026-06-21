@@ -48,13 +48,11 @@ export const apiClient = {
   },
 
   quotes: {
-    // TODO(backend): controller not implemented yet — route is the planned contract
     create: async (command: T.CreateQuoteRequestCommand): Promise<string> => {
-      const response = await api.post<{ id: string }>('/quotes/request', command);
-      return response.data.id;
+      const response = await api.post<string>('/quotes/request', command);
+      return response.data;
     },
 
-    // TODO(backend): controller not implemented yet — route is the planned contract
     list: async (): Promise<T.PendingQuoteDto[]> => {
       const response = await api.get<T.PendingQuoteDto[]>('/quotes');
       return response.data;
