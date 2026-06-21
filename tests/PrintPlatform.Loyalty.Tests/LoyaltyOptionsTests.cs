@@ -17,6 +17,6 @@ public sealed class LoyaltyOptionsTests
     public void Default_cashback_is_positive()
     {
         var opts = new LoyaltyOptions();
-        opts.CashBackPercent.Should().BeGreaterThan(0);
+        opts.PointValueEgp.Should().BeGreaterThan(0);
     }
 }

@@ -9,7 +9,7 @@ public sealed class GamificationOptionsTests
     public void Default_options_have_sensible_values()
     {
         var opts = new GamificationOptions();
-        opts.PointsPerOrder.Should().BeGreaterThan(0);
+        opts.XpOrderDelivered.Should().BeGreaterThan(0);
         opts.BonusMultiplier.Should().BeGreaterThan(0);
     }
 }
