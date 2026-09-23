@@ -208,8 +208,7 @@ try
     {
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
-            // TODO: add authorization filter before going to production.
-            // Authorization = [new HangfireDashboardAuthFilter()]
+            Authorization = [new HangfireDashboardAuthFilter()]
         });
 
         // Register recurring jobs
