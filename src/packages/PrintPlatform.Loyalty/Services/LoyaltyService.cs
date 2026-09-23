@@ -106,7 +106,8 @@ public sealed class LoyaltyService : ILoyaltyService
             Delta = totalAwarded,
             Type = (bonusPoints > 0 || orderAmountEgp == 0) ? LedgerEntryType.Bonus : LedgerEntryType.Earned,
             OrderReference = orderReference,
-            CreatedAt = DateTimeOffset.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow,
+            Expiry = _options.ExpiryMonths > 0 ? DateTimeOffset.UtcNow.AddMonths(_options.ExpiryMonths) : null
         };
         _db.LedgerEntries.Add(entry);
 
@@ -220,5 +221,66 @@ public sealed class LoyaltyService : ILoyaltyService
             .Where(r => r.MemberId == member.Id)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync(ct);
+    }
+
+
+    public async Task<int> ProcessExpiriesAsync(CancellationToken ct = default)
+    {
+        int totalExpired = 0;
+        var now = DateTimeOffset.UtcNow;
+
+        var members = await _db.Members
+            .Where(m => m.ActivePoints > 0)
+            .ToListAsync(ct);
+
+        foreach (var member in members)
+        {
+            var ledgers = await _db.LedgerEntries
+                .Where(l => l.MemberId == member.Id)
+                .ToListAsync(ct);
+
+            int totalEarnedSubjectToExpire = ledgers
+                .Where(l => l.Delta > 0 && l.Expiry.HasValue && l.Expiry.Value <= now)
+                .Sum(l => l.Delta);
+
+            int totalNegative = ledgers
+                .Where(l => l.Delta < 0)
+                .Sum(l => -l.Delta); // convert negative to positive for calculation
+
+            // Using FIFO, any spent/expired points offset the oldest earned points.
+            // If the total points that should have expired is greater than the total points already deducted (spent/expired),
+            // the difference is what needs to be expired right now.
+            int pointsToDrop = totalEarnedSubjectToExpire - totalNegative;
+
+            if (pointsToDrop > 0)
+            {
+                // Cannot expire more than the member currently has
+                int actualExpired = Math.Min(pointsToDrop, member.ActivePoints);
+
+                if (actualExpired > 0)
+                {
+                    member.ActivePoints -= actualExpired;
+                    member.UpdatedAt = now;
+
+                    var entry = new PointsLedger
+                    {
+                        MemberId = member.Id,
+                        Delta = -actualExpired,
+                        Type = LedgerEntryType.Expired,
+                        CreatedAt = now
+                    };
+                    _db.LedgerEntries.Add(entry);
+
+                    totalExpired += actualExpired;
+                }
+            }
+        }
+
+        if (totalExpired > 0)
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+
+        return totalExpired;
     }
 }
