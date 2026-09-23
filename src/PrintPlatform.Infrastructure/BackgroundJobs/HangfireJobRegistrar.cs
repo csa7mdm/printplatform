@@ -1,4 +1,6 @@
 using Hangfire;
+using MediatR;
+using PrintPlatform.Application.Loyalty.Commands;
 
 namespace PrintPlatform.Infrastructure.BackgroundJobs;
 
@@ -19,9 +21,20 @@ public static class HangfireJobRegistrar
             "*/5 * * * *");
 
         // Spec: loyalty-expiry "0 2 * * *"
-        RecurringJob.AddOrUpdate(
+        RecurringJob.AddOrUpdate<ProcessLoyaltyExpiryJob>(
             "loyalty-expiry",
-            () => Console.WriteLine("Processing loyalty point expiry..."), // Placeholder for IMediator.Send(new ProcessLoyaltyExpiryCommand())
+            job => job.ExecuteAsync(),
             "0 2 * * *");
+    }
+}
+
+public class ProcessLoyaltyExpiryJob
+{
+    private readonly IMediator _mediator;
+    public ProcessLoyaltyExpiryJob(IMediator mediator) => _mediator = mediator;
+
+    public async Task ExecuteAsync()
+    {
+        await _mediator.Send(new ProcessLoyaltyExpiryCommand());
     }
 }

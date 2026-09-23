@@ -71,6 +71,12 @@ public interface ILoyaltyService
     Task<IReadOnlyList<Redemption>> GetRedemptionsAsync(
         string externalUserId,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Processes point expirations for all members, deducting points that have passed their expiry date.
+    /// Returns the total number of points expired across all members.
+    /// </summary>
+    Task<int> ProcessExpiriesAsync(CancellationToken ct = default);
 }
 
 /// <summary>Result returned by <see cref="ILoyaltyService.EarnAsync"/>.</summary>
