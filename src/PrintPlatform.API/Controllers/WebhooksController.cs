@@ -2,8 +2,11 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using PrintPlatform.Application.Webhooks.Commands;
+using PrintPlatform.Application.Webhooks.Models;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace PrintPlatform.API.Controllers;
 
@@ -67,10 +70,18 @@ public class WebhooksController : ApiControllerBase
             return Unauthorized("Invalid signature.");
         }
 
-        // TODO: Dequeue the JSON body and map to a MediatR notification to process the message.
-        // For now, just return OK.
-        // var notification = JsonSerializer.Deserialize<WhatsAppNotification>(body);
-        // await Mediator.Send(new ProcessWhatsAppMessageCommand(notification));
+        try
+        {
+            var notification = JsonSerializer.Deserialize<WhatsAppNotification>(body);
+            if (notification != null)
+            {
+                await Mediator.Send(new ProcessWhatsAppMessageCommand(notification));
+            }
+        }
+        catch (JsonException)
+        {
+            // Log serialization failure if needed, but return OK to acknowledge receipt.
+        }
 
         return Ok();
     }
