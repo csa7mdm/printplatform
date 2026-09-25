@@ -69,9 +69,26 @@ public sealed partial class AppDbContext
                 // 3. JSON columns for lists
                 if (property.ClrType == typeof(List<string>) || property.ClrType == typeof(List<Guid>))
                 {
-                    // Assuming HasJsonConversion is available as an extension or we can apply it directly
-                    // Since it's an extension, we'll try to use it via Reflection or just apply it manually
-                    // For now, applying manually via a helper if I can, or just call the extension if I know it works.
+                    // Get the generic method: Property<TProperty>(string propertyName)
+                    var entityBuilder = builder.Entity(entityType.ClrType);
+                    var propertyMethod = typeof(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)
+                        .GetMethods()
+                        .First(m => m.Name == "Property" &&
+                                    m.GetParameters().Length == 1 &&
+                                    m.GetParameters()[0].ParameterType == typeof(string) &&
+                                    m.ReturnType.IsGenericType &&
+                                    m.ReturnType.GetGenericTypeDefinition() == typeof(Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder<>));
+
+                    // Call entityBuilder.Property<T>(property.Name)
+                    var genericPropertyMethod = propertyMethod.MakeGenericMethod(property.ClrType);
+                    var propertyBuilder = genericPropertyMethod.Invoke(entityBuilder, new object[] { property.Name });
+
+                    // Find and call JsonConversionExtensions.HasJsonConversion<T>(propertyBuilder)
+                    var extensionMethod = typeof(JsonConversionExtensions)
+                        .GetMethod(nameof(JsonConversionExtensions.HasJsonConversion))!
+                        .MakeGenericMethod(property.ClrType);
+
+                    extensionMethod.Invoke(null, new object?[] { propertyBuilder });
                 }
             }
         }

@@ -7,6 +7,8 @@ using PrintPlatform.Application.Webhooks.Models;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using PrintPlatform.Application.Notifications.Commands;
+using PrintPlatform.Application.Notifications.Models;
 
 namespace PrintPlatform.API.Controllers;
 
@@ -70,17 +72,14 @@ public class WebhooksController : ApiControllerBase
             return Unauthorized("Invalid signature.");
         }
 
-        try
+        var notification = JsonSerializer.Deserialize<WhatsAppNotification>(body, new JsonSerializerOptions
         {
-            var notification = JsonSerializer.Deserialize<WhatsAppNotification>(body);
-            if (notification != null)
-            {
-                await Mediator.Send(new ProcessWhatsAppMessageCommand(notification));
-            }
-        }
-        catch (JsonException)
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (notification != null)
         {
-            // Log serialization failure if needed, but return OK to acknowledge receipt.
+            await Mediator.Send(new ProcessWhatsAppMessageCommand(notification));
         }
 
         return Ok();
