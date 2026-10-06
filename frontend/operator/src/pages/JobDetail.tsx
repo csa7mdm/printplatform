@@ -4,20 +4,6 @@ import StatusChip from '../components/StatusChip';
 import JobTimeline from '../components/JobTimeline';
 import QCPhotoGrid from '../components/QCPhotoGrid';
 import { CheckCircle, XCircle } from 'lucide-react';
-
-const mockTimeline = [
-  { id: '1', label: 'Assigned', date: '2023-11-19', isCompleted: true, isCurrent: false },
-  { id: '2', label: 'Printing', date: '2023-11-19', isCompleted: true, isCurrent: false },
-  { id: '3', label: 'QC Review', date: '2023-11-21', isCompleted: false, isCurrent: true },
-  { id: '4', label: 'Delivered', isCompleted: false, isCurrent: false },
-];
-
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import StatusChip from '../components/StatusChip';
-import JobTimeline from '../components/JobTimeline';
-import QCPhotoGrid from '../components/QCPhotoGrid';
-import { CheckCircle, XCircle } from 'lucide-react';
 import { useQcApprove, useQcReject } from '../api/hooks';
 
 const mockTimeline = [
@@ -179,4 +165,4 @@ export default function JobDetail() {
       )}
     </div>
   );
-}
+}
