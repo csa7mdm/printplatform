@@ -16,7 +16,7 @@ namespace PrintPlatform.Application.Orders.Commands;
 public sealed record ConfirmPaymentCommand(
     string PaymobOrderId,
     bool Success,
-    decimal AmountCentsEgp) : IRequest<Result>;
+    decimal AmountCents) : IRequest<Result>;
 
 public sealed class ConfirmPaymentHandler : IRequestHandler<ConfirmPaymentCommand, Result>
 {
@@ -45,6 +45,16 @@ public sealed class ConfirmPaymentHandler : IRequestHandler<ConfirmPaymentComman
             _logger.LogInformation(
                 "Paymob reported a failed/declined transaction for order {OrderId}", order.Id);
             return Result.Success(); // leave order PendingPayment; customer may retry.
+        }
+
+        // Amount reconciliation: Paymob "amount_cents" is piasters (EGP × 100).
+        var expectedCents = decimal.Round(order.TotalEgp * 100m, 0);
+        if (request.AmountCents > 0m && request.AmountCents != expectedCents)
+        {
+            _logger.LogWarning(
+                "Paymob amount mismatch for order {OrderId}: expected {Expected} piasters, got {Actual}",
+                order.Id, expectedCents, request.AmountCents);
+            return Result.Failure(OrderErrors.PaymentAmountMismatch);
         }
 
         var confirm = order.Confirm();

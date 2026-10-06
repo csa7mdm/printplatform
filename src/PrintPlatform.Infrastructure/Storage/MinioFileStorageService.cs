@@ -69,6 +69,12 @@ public class MinioFileStorageService : IFileStorageService
         return Task.FromResult(_s3Client.GetPreSignedURL(request));
     }
 
+    public async Task<Stream> DownloadAsync(string key, CancellationToken cancellationToken = default)
+    {
+        var response = await _s3Client.GetObjectAsync(_options.BucketName, key, cancellationToken);
+        return response.ResponseStream;
+    }
+
     public async Task DeleteAsync(string key, CancellationToken cancellationToken = default)
     {
         await _s3Client.DeleteObjectAsync(_options.BucketName, key, cancellationToken);

@@ -60,8 +60,14 @@ public sealed class DatabaseSeeder
     private async Task SeedAdminAsync()
     {
         var adminConfig = _configuration.GetSection("SeedData:Admin");
-        var email = adminConfig["Email"] ?? "admin@printplatform.com";
-        var password = adminConfig["Password"] ?? "Admin123!";
+        // No hardcoded fallback: a default-credential admin in any environment is a
+        // critical vulnerability. Fail fast and force explicit configuration.
+        var email = adminConfig["Email"]
+            ?? throw new InvalidOperationException(
+                "SeedData:Admin:Email is not configured. Refusing to seed a default admin.");
+        var password = adminConfig["Password"]
+            ?? throw new InvalidOperationException(
+                "SeedData:Admin:Password is not configured. Refusing to seed a default-credential admin.");
         var fullName = adminConfig["FullName"] ?? "System Admin";
 
         var adminUser = await _userManager.FindByEmailAsync(email);

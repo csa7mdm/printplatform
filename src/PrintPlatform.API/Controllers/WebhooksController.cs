@@ -2,8 +2,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using PrintPlatform.Application.Webhooks.Commands;
-using PrintPlatform.Application.Webhooks.Models;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PrintPlatform.Application.Abstractions;
 using PrintPlatform.Application.Orders.Quoting;
+using PrintPlatform.Infrastructure.BackgroundJobs;
 using PrintPlatform.Infrastructure.Modules;
 
 namespace PrintPlatform.Infrastructure.Orders;
@@ -124,11 +125,19 @@ public sealed class PaymobGateway : IPaymentGateway
 public sealed class ModelGeometryAnalysisJob
 {
     private readonly IAppDbContext _db;
+    private readonly IFileStorageService _storage;
+    private readonly ModelAnalysisOptions _options;
     private readonly ILogger<ModelGeometryAnalysisJob> _logger;
 
-    public ModelGeometryAnalysisJob(IAppDbContext db, ILogger<ModelGeometryAnalysisJob> logger)
+    public ModelGeometryAnalysisJob(
+        IAppDbContext db,
+        IFileStorageService storage,
+        IOptions<ModelAnalysisOptions> options,
+        ILogger<ModelGeometryAnalysisJob> logger)
     {
         _db = db;
+        _storage = storage;
+        _options = options.Value;
         _logger = logger;
     }
 
@@ -140,11 +149,40 @@ public sealed class ModelGeometryAnalysisJob
             _logger.LogWarning("ModelGeometryAnalysisJob: model {ModelFileId} not found", modelFileId);
             return;
         }
-        // Placeholder estimate until real STL parsing is wired (volume/weight/time).
-        model.ApplyAnalysis(volumeCc: 0m, boundingBoxX: 0m, boundingBoxY: 0m, boundingBoxZ: 0m,
-            weightGrams: 0m, printHours: 0m,
-            notes: "Auto-analysis placeholder — STL geometry parsing pending.");
-        await _db.SaveChangesAsync(ct);
+
+        try
+        {
+            // Download the raw bytes from object storage and parse the mesh by format.
+            await using var stream = await _storage.DownloadAsync(model.StorageKey, ct);
+            var geometry = ModelGeometryReader.Read(model.FileFormat, stream);
+
+            // mm³ → cc; then weight = volume × density × effective fill (shell + infill).
+            var volumeCc = geometry.VolumeCubicMm / 1000m;
+            var effectiveFill = Math.Min(
+                1m,
+                _options.SolidShellFraction + _options.AssumedInfillFraction * (1m - _options.SolidShellFraction));
+            var weight = volumeCc * _options.MaterialDensityGramsPerCc * effectiveFill;
+            var hours = _options.PrintSpeedGramsPerHour > 0m
+                ? weight / _options.PrintSpeedGramsPerHour
+                : 0m;
+
+            model.ApplyAnalysis(
+                volumeCc: decimal.Round(volumeCc, 3),
+                boundingBoxX: decimal.Round(geometry.BoundingBoxXmm, 3),
+                boundingBoxY: decimal.Round(geometry.BoundingBoxYmm, 3),
+                boundingBoxZ: decimal.Round(geometry.BoundingBoxZmm, 3),
+                weightGrams: decimal.Round(weight, 2),
+                printHours: decimal.Round(hours, 2),
+                notes: $"Auto-analysis: {geometry.TriangleCount} triangles ({model.FileFormat}).");
+
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Geometry analysis failed for model {ModelFileId}", modelFileId);
+            model.Reject($"Geometry analysis failed: {ex.Message}");
+            await _db.SaveChangesAsync(ct);
+        }
     }
 }
 
@@ -168,6 +206,7 @@ public sealed class OrdersModuleInstaller : IModuleInstaller
         services.Configure<PaymobOptions>(configuration.GetSection(PaymobOptions.SectionName));
         services.AddHttpClient<IPaymentGateway, PaymobGateway>();
 
+        services.Configure<ModelAnalysisOptions>(configuration.GetSection(ModelAnalysisOptions.SectionName));
         services.AddScoped<ModelGeometryAnalysisJob>();
         services.AddScoped<IModelAnalysisJobScheduler, HangfireModelAnalysisJobScheduler>();
     }
