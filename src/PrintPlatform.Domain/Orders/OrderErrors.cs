@@ -69,4 +69,7 @@ public static class OrderErrors
 
     public static readonly Error InvalidWebhookSignature =
         Error.Unauthorized("Payment.InvalidSignature", "The payment webhook HMAC signature is invalid.");
+
+    public static readonly Error PaymentAmountMismatch =
+        Error.Validation("Payment.AmountMismatch", "The webhook amount does not match the order total.");
 }

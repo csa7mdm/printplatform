@@ -18,4 +18,8 @@ public static class FinanceErrors
 
     public static readonly Error InvalidPeriod =
         Error.Validation("Finance.InvalidPeriod", "The payout period end must be after the period start.");
+
+    public static readonly Error ConcurrentPayoutConflict =
+        Error.Conflict("Finance.ConcurrentPayoutConflict",
+            "One or more jobs were already included in another payout batch; retry the period.");
 }

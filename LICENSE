@@ -1,0 +1,108 @@
+Business Source License 1.1
+
+Parameters
+
+Licensor:             Ahmed Mustafa
+
+Licensed Work:        PrintPlatform — Egypt 3D Printing Fulfillment Platform
+                      The Licensed Work is (c) 2026 Ahmed Mustafa
+
+Additional Use Grant: You may use the Licensed Work for production purposes for
+                      your own internal business operations, provided you do not
+                      offer the Licensed Work, or a substantially similar
+                      service, to third parties as a hosted or managed
+                      service ("SaaS"). (Optional — delete or adjust this grant
+                      if you want stricter terms.)
+
+Change Date:          2030-06-20
+
+Change License:       Apache License, Version 2.0
+
+For information about alternative licensing arrangements for the Licensed Work,
+please contact cs.a7md.m@gmail.com.
+
+Notice
+
+The Business Source License (this document, or the "License") is not an Open
+Source license. However, the Licensed Work will eventually be made available
+under an Open Source License, as stated in this License.
+
+License text copyright (c) 2017 MariaDB Corporation Ab, All Rights Reserved.
+"Business Source License" is a trademark of MariaDB Corporation Ab.
+
+-----------------------------------------------------------------------------
+
+Business Source License 1.1
+
+Terms
+
+The Licensor hereby grants you the right to copy, modify, create derivative
+works, redistribute, and make non-production use of the Licensed Work. The
+Licensor may make an Additional Use Grant, above, permitting limited
+production use.
+
+Effective on the Change Date, or the fourth anniversary of the first publicly
+available distribution of a specific version of the Licensed Work under this
+License, whichever comes first, the Licensor hereby grants you rights under
+the terms of the Change License, and the rights granted in the paragraph
+above terminate.
+
+If your use of the Licensed Work does not comply with the requirements
+currently in effect as described in this License, you must purchase a
+commercial license from the Licensor, its affiliated entities, or authorized
+resellers, or you must refrain from using the Licensed Work.
+
+All copies of the original and modified Licensed Work, and derivative works
+of the Licensed Work, are subject to this License. This License applies
+separately for each version of the Licensed Work and the Change Date may vary
+for each version of the Licensed Work released by Licensor.
+
+You must conspicuously display this License on each original or modified copy
+of the Licensed Work. If you receive the Licensed Work in original or modified
+form from a third party, the terms and conditions set forth in this License
+apply to your use of that work.
+
+Any use of the Licensed Work other than as authorized under this License or
+Copyright Law is prohibited.
+
+To the extent possible under law, the Licensor offers the Licensed Work
+as-is and as-available, and makes no representations or warranties of any kind
+concerning the Licensed Work, whether express, implied, statutory, or other.
+This includes, without limitation, warranties of title, merchantability,
+fitness for a particular purpose, non-infringement, absence of latent or
+other defects, accuracy, or the presence or absence of errors, whether or not
+known or discoverable. Where disclaimers of warranties are not allowed in full
+or in part, this disclaimer may not apply to You.
+
+To the extent possible under law, the Licensor will not be liable to You on
+any legal theory (including, without limitation, negligence) or otherwise for
+any direct, special, indirect, incidental, consequential, punitive, exemplary,
+or other losses, costs, expenses, or damages arising out of this License or
+use of the Licensed Work, even if the Licensor has been advised of the
+possibility of such losses, costs, expenses, or damages. Where a limitation of
+liability is not allowed in full or in part, this limitation may not apply to
+You.
+
+The disclaimer of warranties and limitation of liability provided above shall
+be interpreted in a manner that, to the extent possible, most closely
+approximates an absolute disclaimer and waiver of all liability.
+
+Definitions
+
+"Change License" means the license specified in the Parameters section.
+
+"Change Date" means the date specified in the Parameters section.
+
+"Licensed Work" means the work specified in the Parameters section.
+
+"Licensor" means the person or entity specified in the Parameters section.
+
+"Production Use" means use of the Licensed Work in a production environment
+that is intended to be used by end users of the Licensed Work, or use of the
+Licensed Work by You to provide a service to third parties, or any use that
+produces revenue or is used in support of a revenue-producing activity.
+
+"Additional Use Grant" means the grant specified in the Parameters section.
+
+"Use" means anything You do with the Licensed Work that requires one of the
+licenses granted under this License.

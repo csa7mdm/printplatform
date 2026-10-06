@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Home",
+    "jobs": "Jobs",
+    "earnings": "Earnings",
+    "achievements": "Achievements",
+    "profile": "Profile"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "logout": "Log out",
+    "noData": "No data",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "auth": {
+    "title": "Printer owner sign in",
+    "register": "Register as a printer owner",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in"
+  },
+  "home": {
+    "title": "Available jobs",
+    "availableOffers": "Offers waiting for you",
+    "noOffers": "No jobs available right now"
+  },
+  "earnings": {
+    "title": "Your earnings",
+    "totalEarnings": "Total earnings",
+    "weeklyPayout": "Weekly payout",
+    "history": "Payout history"
+  },
+  "status": {
+    "offered": "Offered",
+    "accepted": "Accepted",
+    "printing": "Printing",
+    "qcPending": "QC pending",
+    "qcApproved": "QC approved",
+    "shipped": "Shipped",
+    "delivered": "Delivered"
+  }
+}

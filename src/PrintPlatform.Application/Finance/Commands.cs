@@ -184,14 +184,27 @@ public sealed class InitiateWeeklyPayoutsHandler
             ledgerEntries.Add(ledger.Value);
         }
 
+        var batchedIds = eligibleJobs.Select(j => j.Id).ToArray();
+
+        // Atomic claim: only rows still in Pending are flipped to Batched. A concurrent
+        // run (the scheduled weekly job vs. the admin-initiated endpoint) that read the
+        // same jobs before we committed will now match zero rows, so `claimed` falls short
+        // and we roll back instead of paying the same job twice.
+        var claimed = await _db.JobAssignments
+            .Where(j => batchedIds.Contains(j.Id)
+                        && j.PayoutStatus == Domain.Dispatch.PayoutStatus.Pending)
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(j => j.PayoutStatus, Domain.Dispatch.PayoutStatus.Batched),
+                ct);
+
+        if (claimed != batchedIds.Length)
+        {
+            await tx.RollbackAsync(ct);
+            return FinanceErrors.ConcurrentPayoutConflict;
+        }
+
         await _db.Payouts.AddRangeAsync(payouts, ct);
         await _db.LedgerEntries.AddRangeAsync(ledgerEntries, ct);
-
-        var batchedIds = eligibleJobs.Select(j => j.Id).ToArray();
-        await _db.JobAssignments
-            .Where(j => batchedIds.Contains(j.Id))
-            .ExecuteUpdateAsync(s => s.SetProperty(j => j.PayoutStatus, Domain.Dispatch.PayoutStatus.Batched), ct);
-
         await _db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
 

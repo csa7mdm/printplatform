@@ -1,3 +1,5 @@
+import tailwindcssRtl from 'tailwindcss-rtl';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -8,28 +10,28 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#3b82f6', // blue-500
+          DEFAULT: '#3b82f6',
           foreground: '#ffffff',
         },
         success: {
-          DEFAULT: '#22c55e', // green-500
+          DEFAULT: '#22c55e',
           foreground: '#ffffff',
         },
         warning: {
-          DEFAULT: '#f59e0b', // amber-500
+          DEFAULT: '#f59e0b',
           foreground: '#ffffff',
         },
         destructive: {
-          DEFAULT: '#ef4444', // red-500
+          DEFAULT: '#ef4444',
           foreground: '#ffffff',
         },
-        background: '#f8fafc', // slate-50
+        background: '#f8fafc',
         card: '#ffffff',
-        border: '#e2e8f0', // slate-200
-        text: '#0f172a', // slate-900
-        muted: '#64748b', // slate-500
+        border: '#e2e8f0',
+        text: '#0f172a',
+        muted: '#64748b',
       }
     },
   },
-  plugins: [],
+  plugins: [tailwindcssRtl],
 }

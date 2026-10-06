@@ -3,6 +3,7 @@ using Hangfire.PostgreSql;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using PrintPlatform.API.Middleware;
@@ -196,7 +197,7 @@ try
         Predicate = _ => false,
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
     });
-    
+
     app.MapHealthChecks("/health/ready", new()
     {
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
@@ -215,13 +216,26 @@ try
         HangfireJobRegistrar.RegisterJobs();
     }
 
-    // -- Seed database ------------------------------------------------------
+    // -- Migrate + seed database ---------------------------------------------
     // Skipped under integration tests, where the test harness owns schema + seeding.
     if (!app.Environment.IsEnvironment("Testing"))
     {
         using var scope = app.Services.CreateScope();
-        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-        await seeder.SeedAsync();
+        var services = scope.ServiceProvider;
+
+        // Self-provisioning: apply pending EF migrations on startup so a fresh
+        // deploy is never blocked on a manual `dotnet ef database update`.
+        // NOTE: GamificationDbContext / LoyaltyDbContext / MarketplaceDbContext also
+        // own schema; migrate (or EnsureCreated) them here too before seeding.
+        await services.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+
+        // Seed reference data + admin ONLY in non-Production environments so a
+        // Production deploy never provisions a default-credential admin.
+        if (!app.Environment.IsProduction())
+        {
+            var seeder = services.GetRequiredService<DatabaseSeeder>();
+            await seeder.SeedAsync();
+        }
     }
 
     await app.RunAsync();
