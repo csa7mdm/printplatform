@@ -4,6 +4,21 @@ namespace PrintPlatform.Domain.Dispatch;
 
 public static class DispatchErrors
 {
+    public static readonly Error InvalidOrderItemId = Error.Validation(
+        "Job.InvalidOrderItemId", "Order Item ID cannot be empty.");
+
+    public static readonly Error InvalidPrinterId = Error.Validation(
+        "Job.InvalidPrinterId", "Printer ID cannot be empty.");
+
+    public static readonly Error InvalidPrinterOwnerUserId = Error.Validation(
+        "Job.InvalidPrinterOwnerUserId", "Printer Owner User ID cannot be empty.");
+
+    public static readonly Error InvalidPayoutAmount = Error.Validation(
+        "Job.InvalidPayoutAmount", "Payout amount must be greater than zero.");
+
+    public static readonly Error NotesTooLong = Error.Validation(
+        "Job.NotesTooLong", "Operator notes cannot exceed 1000 characters.");
+
     public static readonly Error CannotAccept = Error.Failure(
         "Job.CannotAccept", "Job cannot be accepted unless it has been offered.");
 

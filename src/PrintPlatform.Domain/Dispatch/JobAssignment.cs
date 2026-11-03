@@ -11,6 +11,21 @@ public class JobAssignment : BaseAggregateRoot<Guid>
 
     public static Result<JobAssignment> Create(Guid orderItemId, Guid printerId, Guid printerOwnerUserId, decimal payoutAmount, string? operatorNotes)
     {
+        if (orderItemId == Guid.Empty)
+            return Result.Failure<JobAssignment>(DispatchErrors.InvalidOrderItemId);
+
+        if (printerId == Guid.Empty)
+            return Result.Failure<JobAssignment>(DispatchErrors.InvalidPrinterId);
+
+        if (printerOwnerUserId == Guid.Empty)
+            return Result.Failure<JobAssignment>(DispatchErrors.InvalidPrinterOwnerUserId);
+
+        if (payoutAmount <= 0)
+            return Result.Failure<JobAssignment>(DispatchErrors.InvalidPayoutAmount);
+
+        if (operatorNotes?.Length > 1000)
+            return Result.Failure<JobAssignment>(DispatchErrors.NotesTooLong);
+
         var job = new JobAssignment
         {
             Id = Guid.NewGuid(),
