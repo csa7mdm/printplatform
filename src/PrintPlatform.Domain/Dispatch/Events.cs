@@ -14,10 +14,10 @@ public sealed record JobAcceptedEvent(Guid JobAssignmentId, Guid PrinterOwnerUse
         : this(jobAssignmentId, printerOwnerUserId, DateTimeOffset.UtcNow) { }
 }
 
-public sealed record JobRejectedEvent(Guid JobAssignmentId, Guid PrinterOwnerUserId, Guid OrderItemId, DateTimeOffset OccurredAt) : IDomainEvent
+public sealed record JobRejectedEvent(Guid JobAssignmentId, Guid PrinterOwnerUserId, Guid OrderItemId, bool AutoRejected, DateTimeOffset OccurredAt) : IDomainEvent
 {
-    public JobRejectedEvent(Guid jobAssignmentId, Guid printerOwnerUserId, Guid orderItemId)
-        : this(jobAssignmentId, printerOwnerUserId, orderItemId, DateTimeOffset.UtcNow) { }
+    public JobRejectedEvent(Guid jobAssignmentId, Guid printerOwnerUserId, Guid orderItemId, bool autoRejected)
+        : this(jobAssignmentId, printerOwnerUserId, orderItemId, autoRejected, DateTimeOffset.UtcNow) { }
 }
 
 public sealed record QCApprovedEvent(Guid JobAssignmentId, Guid PrinterOwnerUserId, DateTimeOffset OccurredAt) : IDomainEvent
