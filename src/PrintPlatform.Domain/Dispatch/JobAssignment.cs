@@ -73,7 +73,7 @@ public class JobAssignment : BaseAggregateRoot<Guid>
 
         Status = JobAssignmentStatus.Rejected;
         CompletedAt = DateTimeOffset.UtcNow; // Or a new RejectedAt property
-        RaiseDomainEvent(new JobRejectedEvent(Id, PrinterOwnerUserId, OrderItemId));
+        RaiseDomainEvent(new JobRejectedEvent(Id, PrinterOwnerUserId, OrderItemId, autoRejected));
         
         return Result.Success();
     }
