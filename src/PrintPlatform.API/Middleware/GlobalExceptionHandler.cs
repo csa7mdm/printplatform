@@ -56,4 +56,9 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
 // Stubs for custom exception types referenced above
 public class NotFoundException : Exception { public NotFoundException(string message) : base(message) { } }
 public class ConflictException : Exception { public ConflictException(string message) : base(message) { } }
-public class ForbiddenAccessException : Exception { public ForbiddenAccessException() : base() { } }
+public class ForbiddenAccessException : Exception
+{
+    public ForbiddenAccessException() : base() { }
+    public ForbiddenAccessException(string message) : base(message) { }
+    public ForbiddenAccessException(string message, Exception innerException) : base(message, innerException) { }
+}
