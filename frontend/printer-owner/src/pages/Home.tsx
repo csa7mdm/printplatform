@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Power, Settings, ChevronRight, Activity, Zap } from 'lucide-react';
+import { Power, Activity, Zap } from 'lucide-react';
 import JobOfferCard from '../components/JobOfferCard';
 
 export default function Home() {
