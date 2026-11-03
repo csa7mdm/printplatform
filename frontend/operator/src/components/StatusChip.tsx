@@ -1,5 +1,3 @@
-import React from 'react';
-
 type StatusType = 'pending' | 'active' | 'completed' | 'failed' | 'qc_pending' | 'ready';
 
 interface Props {
